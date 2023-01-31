@@ -4,7 +4,9 @@ use serenity::async_trait;
 use serenity::Client;
 use serenity::client::Context;
 use serenity::framework::StandardFramework;
-use serenity::model::prelude::Ready;
+use serenity::framework::standard::CommandResult;
+use serenity::framework::standard::macros::{command, group};
+use serenity::model::prelude::{Message, Ready};
 use serenity::prelude::{GatewayIntents, EventHandler};
 
 // Event Handler
@@ -17,12 +19,23 @@ impl EventHandler for Handler {
     }
 }
 
+#[group]
+#[commands(ping)]
+struct General;
+
+#[command]
+async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
+    msg.channel_id.say(&ctx.http, "pong!").await?;
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() {
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
 
     let framework = StandardFramework::new()
-        .configure(|c| c.prefix("!"));
+        .configure(|c| c.prefix("!"))
+        .group(&GENERAL_GROUP);
 
     let intents = GatewayIntents::GUILD_MEMBERS
         | GatewayIntents::GUILD_MESSAGES
